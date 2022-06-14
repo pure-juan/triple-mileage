@@ -1,0 +1,23 @@
+version: '3.9'
+networks:
+  bridge:
+    driver: bridge
+services:
+  mariadb:
+    image: 'mysql:8'
+    container_name: mysql
+    user: '0'
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_USERNAME=root
+      - MYSQL_ROOT_PASSWORD=test1111
+      - MYSQL_USER=triple
+      - MYSQL_PASSWORD=test1111
+      - MYSQL_DATABASE=triple
+    networks:
+      - bridge
