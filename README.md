@@ -37,7 +37,25 @@ Author: Juan Kim
 [REST 테스트 파일](http/event.rest)
 
 ```
-POST https://localhost:3000/event
+POST http://localhost:3000/event
+```
+
+### Mileage API
+
+#### Get Mileage by userId
+
+[REST 테스트 파일](http/mileage/get.rest)
+
+```
+GET http://localhost:3000/mileage/users/:userId
+```
+
+#### Get Mileage history by userId
+
+[REST 테스트 파일](http/mileage/get-history.rest)
+
+```
+GET http://localhost:3000/mileage/users/:userId/history
 ```
 
 ## Clean-up
