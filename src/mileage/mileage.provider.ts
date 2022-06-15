@@ -48,6 +48,7 @@ export class MileageProvider {
       // First
       point += 1;
       mileageHistory.push({
+        reviewId: payload.reviewId,
         type: MileageType.FIRST,
         point: 1,
       });
@@ -56,6 +57,7 @@ export class MileageProvider {
     if (payload.content.length > 0) {
       point += 1;
       mileageHistory.push({
+        reviewId: payload.reviewId,
         type: MileageType.CONTENT,
         point: 1,
       });
@@ -64,6 +66,7 @@ export class MileageProvider {
     if (payload.attachedPhotoIds.length > 0) {
       point += 1;
       mileageHistory.push({
+        reviewId: payload.reviewId,
         type: MileageType.PHOTOS,
         point: 1,
       });
@@ -99,6 +102,7 @@ export class MileageProvider {
       mileage.point -= 1;
       mileageHistory.push({
         mileageId: mileage.id,
+        reviewId: payload.reviewId,
         type: MileageType.PHOTOS,
         point: -1,
       });
@@ -106,6 +110,7 @@ export class MileageProvider {
       mileage.point += 1;
       mileageHistory.push({
         mileageId: mileage.id,
+        reviewId: payload.reviewId,
         type: MileageType.PHOTOS,
         point: 1,
       });
@@ -115,6 +120,7 @@ export class MileageProvider {
       mileage.point -= 1;
       mileageHistory.push({
         mileageId: mileage.id,
+        reviewId: payload.reviewId,
         type: MileageType.CONTENT,
         point: -1,
       });
@@ -125,6 +131,7 @@ export class MileageProvider {
       mileage.point += 1;
       mileageHistory.push({
         mileageId: mileage.id,
+        reviewId: payload.reviewId,
         type: MileageType.CONTENT,
         point: 1,
       });
@@ -140,9 +147,10 @@ export class MileageProvider {
     });
     const mileageHistory: Array<Partial<MileageHistory>> = [];
 
-    if (review.photos.length > 0) {
+    if (review.photos?.length > 0) {
       mileageHistory.push({
         mileageId: mileage.id,
+        reviewId: payload.reviewId,
         type: MileageType.PHOTOS,
         point: -1,
       });
@@ -152,6 +160,7 @@ export class MileageProvider {
     if (review.content.length > 0) {
       mileageHistory.push({
         mileageId: mileage.id,
+        reviewId: payload.reviewId,
         type: MileageType.CONTENT,
         point: -1,
       });
@@ -164,12 +173,23 @@ export class MileageProvider {
     });
 
     if (review.id === first.id) {
-      mileageHistory.push({
-        mileageId: mileage.id,
-        type: MileageType.FIRST,
-        point: -1,
+      const history = await this.mileageHistoryStore.findOne({
+        where: {
+          mileageId: mileage.id,
+          reviewId: review.id,
+          type: MileageType.FIRST,
+        },
+        order: { createdAt: 'DESC' },
       });
-      mileage.point -= 1;
+      if (history && history.point === 1) {
+        mileageHistory.push({
+          mileageId: mileage.id,
+          reviewId: payload.reviewId,
+          type: MileageType.FIRST,
+          point: -1,
+        });
+        mileage.point -= 1;
+      }
     }
 
     await this.mileageStore.save(mileage);

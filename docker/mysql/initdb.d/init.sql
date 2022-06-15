@@ -51,6 +51,7 @@ CREATE INDEX IDX_mileage_userId_1 ON mileage (userId);
 CREATE TABLE mileage_history (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     mileageId INT UNSIGNED NOT NULL,
+    reviewId VARCHAR(36) NOT NULL,
     type VARCHAR(10) NOT NULL,
     point INT NOT NULL,
     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

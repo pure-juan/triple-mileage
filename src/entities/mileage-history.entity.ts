@@ -21,6 +21,9 @@ export class MileageHistory {
   @Column({ name: 'mileageId', type: 'int', unsigned: true })
   mileageId: number;
 
+  @Column({ name: 'reviewId', type: 'varchar', length: 36 })
+  reviewId: string;
+
   @Column({ name: 'type', type: 'varchar', length: 10 })
   type: MileageType;
 
