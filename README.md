@@ -37,7 +37,7 @@ Author: Juan Kim
 [REST 테스트 파일](http/event.rest)
 
 ```
-POST http://localhost:3000/event
+POST http://localhost:3000/events
 ```
 
 ### Mileage API

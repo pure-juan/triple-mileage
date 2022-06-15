@@ -39,7 +39,7 @@ export class MileageProvider {
 
   async #addAction(payload: EventRequestDTO): Promise<void> {
     let point = 0;
-    let previous = await this.reviewStore.count({
+    const previous = await this.reviewStore.count({
       where: { placeId: payload.placeId },
     });
     const mileageHistory: Array<Partial<MileageHistory>> = [];
@@ -69,10 +69,15 @@ export class MileageProvider {
       });
     }
 
-    const mileage =
-      (await this.mileageStore.findOne({
-        where: { userId: payload.userId },
-      })) || (await this.mileageStore.save({ userId: payload.userId, point }));
+    let mileage = await this.mileageStore.findOne({
+      where: { userId: payload.userId },
+    });
+    if (mileage) {
+      mileage.point += point;
+      await this.mileageStore.update({ id: mileage.id }, mileage);
+    } else {
+      mileage = await this.mileageStore.save({ userId: payload.userId, point });
+    }
     await this.mileageHistoryStore.save(
       mileageHistory.map((history) => ({ mileageId: mileage.id, ...history })),
     );
@@ -165,24 +170,6 @@ export class MileageProvider {
         point: -1,
       });
       mileage.point -= 1;
-
-      const next = await this.reviewStore
-        .createQueryBuilder('review')
-        .where('placeId = :placeId', { placeId: payload.placeId })
-        .orderBy('createdAt', 'ASC')
-        .limit(1)
-        .offset(1)
-        .getOne();
-      if (next) {
-        const mileage =
-          (await this.mileageStore.findOne({
-            where: { userId: next.userId },
-          })) || (await this.mileageStore.save({ userId: payload.userId }));
-
-        mileage.point += 1;
-
-        await this.mileageStore.save(mileage);
-      }
     }
 
     await this.mileageStore.save(mileage);

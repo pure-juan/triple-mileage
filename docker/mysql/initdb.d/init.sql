@@ -11,6 +11,7 @@ CREATE TABLE event (
     PRIMARY KEY (id),
     CONSTRAINT UQ_reviewId_1 UNIQUE (reviewId)
 );
+
 CREATE INDEX IDX_event_reviewId_1 ON event (reviewId);
 
 CREATE TABLE review (
@@ -22,7 +23,9 @@ CREATE TABLE review (
     updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
+
 CREATE INDEX IDX_review_placeId_1 ON review (placeId);
+
 CREATE INDEX IDX_review_placeId_createdAt_1 ON review (placeId, createdAt);
 
 CREATE TABLE photo (
@@ -39,8 +42,10 @@ CREATE TABLE mileage (
     point INT UNSIGNED NOT NULL DEFAULT 0,
     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT UQ_mileage_userId_1 UNIQUE (userId)
 );
+
 CREATE INDEX IDX_mileage_userId_1 ON mileage (userId);
 
 CREATE TABLE mileage_history (
@@ -50,6 +55,7 @@ CREATE TABLE mileage_history (
     point INT NOT NULL,
     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    CONSTRAINT FK_mileage_history_mileage_1 FOREIGN KEY (mileage_id) REFERENCES mileage (id)
+    CONSTRAINT FK_mileage_history_mileage_1 FOREIGN KEY (mileageId) REFERENCES mileage (id)
 );
-CREATE INDEX IDX_mileage_history_mileage_id_createdAt_1 ON mileage_history (mileageId, createdAt);
+
+CREATE INDEX IDX_mileage_history_mileageId_createdAt_1 ON mileage_history (mileageId, createdAt);
