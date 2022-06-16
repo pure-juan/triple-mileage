@@ -72,15 +72,12 @@ export class MileageProvider {
       });
     }
 
-    let mileage = await this.mileageStore.findOne({
-      where: { userId: payload.userId },
-    });
-    if (mileage) {
-      mileage.point += point;
-      await this.mileageStore.update({ id: mileage.id }, mileage);
-    } else {
-      mileage = await this.mileageStore.save({ userId: payload.userId, point });
-    }
+    const mileage =
+      (await this.mileageStore.findOne({
+        where: { userId: payload.userId },
+      })) || this.mileageStore.create({ userId: payload.userId });
+    mileage.point += point;
+    await this.mileageStore.upsert(mileage, ['userId']);
     await this.mileageHistoryStore.save(
       mileageHistory.map((history) => ({ mileageId: mileage.id, ...history })),
     );

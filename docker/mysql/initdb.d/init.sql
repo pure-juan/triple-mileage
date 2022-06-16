@@ -46,8 +46,6 @@ CREATE TABLE mileage (
     CONSTRAINT UQ_mileage_userId_1 UNIQUE (userId)
 );
 
-CREATE INDEX IDX_mileage_userId_1 ON mileage (userId);
-
 CREATE TABLE mileage_history (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     mileageId INT UNSIGNED NOT NULL,
