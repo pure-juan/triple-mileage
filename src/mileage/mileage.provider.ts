@@ -38,7 +38,11 @@ export class MileageProvider {
   }
 
   async #addAction(payload: EventRequestDTO): Promise<void> {
-    let point = 0;
+    const mileage =
+      (await this.mileageStore.findOne({
+        where: { userId: payload.userId },
+      })) || this.mileageStore.create({ userId: payload.userId, point: 0 });
+
     const previous = await this.reviewStore.count({
       where: { placeId: payload.placeId },
     });
@@ -51,7 +55,7 @@ export class MileageProvider {
         type: MileageType.FIRST,
         point: 1,
       });
-      point += 1;
+      mileage.point += 1;
     }
 
     // 리뷰 작성
@@ -61,7 +65,7 @@ export class MileageProvider {
         type: MileageType.CONTENT,
         point: 1,
       });
-      point += 1;
+      mileage.point += 1;
     }
 
     // 이미지 리뷰 작성
@@ -71,14 +75,9 @@ export class MileageProvider {
         type: MileageType.PHOTOS,
         point: 1,
       });
-      point += 1;
+      mileage.point += 1;
     }
 
-    const mileage =
-      (await this.mileageStore.findOne({
-        where: { userId: payload.userId },
-      })) || this.mileageStore.create({ userId: payload.userId, point: 0 });
-    mileage.point += point;
     await this.mileageStore.upsert(mileage, ['userId']);
     await this.mileageHistoryStore.save(
       mileageHistory.map((history) => ({ mileageId: mileage.id, ...history })),
@@ -90,11 +89,16 @@ export class MileageProvider {
     review: Review,
     previousReview: Review,
   ): Promise<void> {
-    const mileage = await this.mileageStore.findOne({
-      where: {
+    const mileage =
+      (await this.mileageStore.findOne({
+        where: {
+          userId: payload.userId,
+        },
+      })) ||
+      this.mileageStore.create({
         userId: payload.userId,
-      },
-    });
+        point: 0,
+      });
     const mileageHistory: Array<Partial<MileageHistory>> = [];
 
     // 리뷰에서 이미지를 삭제 했을 경우
@@ -140,14 +144,21 @@ export class MileageProvider {
       });
     }
 
-    await this.mileageStore.save(mileage);
+    await this.mileageStore.upsert(mileage, ['userId']);
     await this.mileageHistoryStore.save(mileageHistory);
   }
 
   async #deleteAction(payload: EventRequestDTO, review: Review): Promise<void> {
-    const mileage = await this.mileageStore.findOne({
-      where: { userId: payload.userId },
-    });
+    const mileage =
+      (await this.mileageStore.findOne({
+        where: {
+          userId: payload.userId,
+        },
+      })) ||
+      this.mileageStore.create({
+        userId: payload.userId,
+        point: 0,
+      });
     const mileageHistory: Array<Partial<MileageHistory>> = [];
 
     // 이미지 리뷰 였는지
@@ -199,7 +210,7 @@ export class MileageProvider {
       }
     }
 
-    await this.mileageStore.save(mileage);
+    await this.mileageStore.upsert(mileage, ['userId']);
     await this.mileageHistoryStore.save(mileageHistory);
   }
 }
