@@ -189,7 +189,7 @@ export class MileageProvider {
       order: { createdAt: 'ASC' },
     });
 
-    if (review.id === first.id) {
+    if (review.id === first?.id) {
       const history = await this.mileageHistoryStore.findOne({
         where: {
           mileageId: mileage.id,

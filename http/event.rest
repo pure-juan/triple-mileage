@@ -4,9 +4,9 @@ Content-Type: application/json
 {
   "type": "REVIEW",
   "action": "DELETE",
-  "reviewId": "640a0658-dc5f-4878-9381-ebb7b2667773",
+  "reviewId": "240a0658-dc5f-4878-9381-ebb7b2667773",
   "content": "좋아요!",
-  "attachedPhotoIds": ["640a0658-dc5f-4878-9381-555555555555"],
-  "userId":  "6ede0ef2-92b7-4817-a5f3-0c575361f745",
-  "placeId": "2e4baf1c-5acb-4efb-a1af-eddada31b00f"
+  "attachedPhotoIds": ["240a0658-dc5f-4878-9381-555555555555"],
+  "userId":  "2ede0ef2-92b7-4817-a5f3-0c575361f745",
+  "placeId": "1e4baf1c-5acb-4efb-a1af-eddada31b00f"
 }
