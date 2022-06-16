@@ -1,1 +1,1 @@
-export class EventResponseDTO {}
+export type EventResponseDTO = string;

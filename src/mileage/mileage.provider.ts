@@ -75,7 +75,7 @@ export class MileageProvider {
     const mileage =
       (await this.mileageStore.findOne({
         where: { userId: payload.userId },
-      })) || this.mileageStore.create({ userId: payload.userId });
+      })) || this.mileageStore.create({ userId: payload.userId, point: 0 });
     mileage.point += point;
     await this.mileageStore.upsert(mileage, ['userId']);
     await this.mileageHistoryStore.save(

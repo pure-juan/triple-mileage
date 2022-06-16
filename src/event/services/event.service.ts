@@ -21,7 +21,6 @@ export class EventServiceImpl implements IEventService {
   ) {}
 
   async event(payload: EventRequestDTO): Promise<EventResponseDTO> {
-    let event: Event;
     switch (payload.action) {
       case EventAction.ADD:
         await this.#addEvent(payload);
@@ -33,7 +32,7 @@ export class EventServiceImpl implements IEventService {
         await this.#deleteEvent(payload);
     }
 
-    return null;
+    return 'OK';
   }
 
   async #addEvent(payload: EventRequestDTO): Promise<void> {
@@ -75,9 +74,9 @@ export class EventServiceImpl implements IEventService {
     const photos = payload.attachedPhotoIds.map((attachedPhotoId) =>
       this.photoStore.create({ id: attachedPhotoId, reviewId: event.reviewId }),
     );
-
     await this.photoStore.save(photos);
 
+    // 포인트 계ㄴ
     await this.mileageProvider.calculate(payload, review);
   }
 
@@ -86,6 +85,7 @@ export class EventServiceImpl implements IEventService {
     const event = await this.eventStore.findOne({
       where: {
         reviewId: payload.reviewId,
+        userId: payload.userId,
       },
     });
     if (!event) throw new ApiException(ApiErrorCodes.EVENT.NOT_FOUND);
@@ -100,8 +100,8 @@ export class EventServiceImpl implements IEventService {
     if (!previousReview) throw new ApiException(ApiErrorCodes.REVIEW.NOT_FOUND);
     let review = {
       ...previousReview,
+      content: payload.content,
     };
-    review.content = payload.content;
     await this.reviewStore.save(review);
 
     // PHOTO
@@ -111,17 +111,20 @@ export class EventServiceImpl implements IEventService {
       })
     ).map((photo) => photo.id);
     {
+      // 추가될 이미지들
       const willAddedPhotos = payload.attachedPhotoIds.filter(
         (photoId) => !photoIds.includes(photoId),
       );
+      // 삭제될 이미지들
       const willDeletedPhotos = photoIds.filter(
         (photoId) => !payload.attachedPhotoIds.includes(photoId),
       );
       if (willAddedPhotos.length > 0) {
         await this.photoStore.save(
-          willAddedPhotos.map((photo) =>
-            this.photoStore.create({ id: photo, reviewId: payload.reviewId }),
-          ),
+          willAddedPhotos.map((photo) => ({
+            id: photo,
+            reviewId: payload.reviewId,
+          })),
         );
       }
       if (willDeletedPhotos.length > 0) {
@@ -133,25 +136,30 @@ export class EventServiceImpl implements IEventService {
       });
     }
 
+    // 포인트 계산
     await this.mileageProvider.calculate(payload, review, previousReview);
   }
 
   async #deleteEvent(payload: EventRequestDTO): Promise<void> {
     const event = await this.eventStore.findOne({
-      where: { reviewId: payload.reviewId },
+      where: { reviewId: payload.reviewId, userId: payload.userId },
     });
+    if (!event) {
+      throw new ApiException(ApiErrorCodes.EVENT.NOT_FOUND);
+    }
 
     const review = await this.reviewStore.findOne({
-      where: { id: payload.reviewId },
+      where: { id: payload.reviewId, userId: payload.userId },
       relations: ['photos'],
     });
+    if (!review) {
+      throw new ApiException(ApiErrorCodes.REVIEW.NOT_FOUND);
+    }
 
     await this.mileageProvider.calculate(payload, review);
 
-    await this.eventStore.delete(event.id);
-
-    await this.reviewStore.delete(payload.reviewId);
-
     await this.photoStore.delete({ reviewId: event.reviewId });
+    await this.reviewStore.delete({ id: review.id });
+    await this.eventStore.delete(event);
   }
 }
