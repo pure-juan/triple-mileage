@@ -44,32 +44,34 @@ export class MileageProvider {
     });
     const mileageHistory: Array<Partial<MileageHistory>> = [];
 
+    // 첫 리뷰
     if (previous === 1) {
-      // First
-      point += 1;
       mileageHistory.push({
         reviewId: payload.reviewId,
         type: MileageType.FIRST,
         point: 1,
       });
+      point += 1;
     }
 
+    // 리뷰 작성
     if (payload.content.length > 0) {
-      point += 1;
       mileageHistory.push({
         reviewId: payload.reviewId,
         type: MileageType.CONTENT,
         point: 1,
       });
+      point += 1;
     }
 
+    // 이미지 리뷰 작성
     if (payload.attachedPhotoIds.length > 0) {
-      point += 1;
       mileageHistory.push({
         reviewId: payload.reviewId,
         type: MileageType.PHOTOS,
         point: 1,
       });
+      point += 1;
     }
 
     const mileage =
@@ -95,6 +97,7 @@ export class MileageProvider {
     });
     const mileageHistory: Array<Partial<MileageHistory>> = [];
 
+    // 리뷰에서 이미지를 삭제 했을 경우
     if (previousReview.photos.length > 0 && review.photos.length === 0) {
       mileage.point -= 1;
       mileageHistory.push({
@@ -104,6 +107,7 @@ export class MileageProvider {
         point: -1,
       });
     } else if (previousReview.photos.length === 0 && review.photos.length > 0) {
+      // 이미지가 없었지만 추가한 경우
       mileage.point += 1;
       mileageHistory.push({
         mileageId: mileage.id,
@@ -113,6 +117,7 @@ export class MileageProvider {
       });
     }
 
+    // 내용이 없어진 경우
     if (previousReview.content.length > 0 && review.content.length === 0) {
       mileage.point -= 1;
       mileageHistory.push({
@@ -125,6 +130,7 @@ export class MileageProvider {
       previousReview.content.length === 0 &&
       review.content.length > 0
     ) {
+      // 내용이 없었다가 추가된 경우
       mileage.point += 1;
       mileageHistory.push({
         mileageId: mileage.id,
@@ -144,6 +150,7 @@ export class MileageProvider {
     });
     const mileageHistory: Array<Partial<MileageHistory>> = [];
 
+    // 이미지 리뷰 였는지
     if (review.photos?.length > 0) {
       mileageHistory.push({
         mileageId: mileage.id,
@@ -154,6 +161,7 @@ export class MileageProvider {
       mileage.point -= 1;
     }
 
+    // 리뷰 내용이 있었는지
     if (review.content.length > 0) {
       mileageHistory.push({
         mileageId: mileage.id,
@@ -164,6 +172,7 @@ export class MileageProvider {
       mileage.point -= 1;
     }
 
+    // 첫 리뷰였는지
     const first = await this.reviewStore.findOne({
       where: { placeId: payload.placeId },
       order: { createdAt: 'ASC' },
@@ -178,6 +187,7 @@ export class MileageProvider {
         },
         order: { createdAt: 'DESC' },
       });
+      // 첫 리뷰로 포인트를 받은 적이 있는지
       if (history && history.point === 1) {
         mileageHistory.push({
           mileageId: mileage.id,

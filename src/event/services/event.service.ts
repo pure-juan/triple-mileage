@@ -26,7 +26,7 @@ export class EventServiceImpl implements IEventService {
         await this.#addEvent(payload);
         break;
       case EventAction.MODIFY:
-        await this.#updateEvent(payload);
+        await this.#modEvent(payload);
         break;
       case EventAction.DELETE:
         await this.#deleteEvent(payload);
@@ -76,11 +76,11 @@ export class EventServiceImpl implements IEventService {
     );
     await this.photoStore.save(photos);
 
-    // 포인트 계ㄴ
+    // 포인트 계산
     await this.mileageProvider.calculate(payload, review);
   }
 
-  async #updateEvent(payload: EventRequestDTO): Promise<void> {
+  async #modEvent(payload: EventRequestDTO): Promise<void> {
     // EVENT
     const event = await this.eventStore.findOne({
       where: {
@@ -141,6 +141,7 @@ export class EventServiceImpl implements IEventService {
   }
 
   async #deleteEvent(payload: EventRequestDTO): Promise<void> {
+    // EVENT
     const event = await this.eventStore.findOne({
       where: { reviewId: payload.reviewId, userId: payload.userId },
     });
@@ -148,6 +149,7 @@ export class EventServiceImpl implements IEventService {
       throw new ApiException(ApiErrorCodes.EVENT.NOT_FOUND);
     }
 
+    // REVIEW
     const review = await this.reviewStore.findOne({
       where: { id: payload.reviewId, userId: payload.userId },
       relations: ['photos'],
@@ -156,6 +158,7 @@ export class EventServiceImpl implements IEventService {
       throw new ApiException(ApiErrorCodes.REVIEW.NOT_FOUND);
     }
 
+    // 포인트 계산
     await this.mileageProvider.calculate(payload, review);
 
     await this.photoStore.delete({ reviewId: event.reviewId });
